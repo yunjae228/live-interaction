@@ -14,10 +14,17 @@
 
   formEl.addEventListener('submit', (event) => {
     event.preventDefault()
-    socket.send(inputEl.value)
+    socket.send(
+      JSON.stringify({
+        nickname: '멋진 물범',
+        message: inputEl.value,
+      })
+    )
 
     inputEl.value = ''
   })
 
-  socket.addEventListener('message', (event) => {})
+  socket.addEventListener('message', (event) => {
+    alert(event.data)
+  })
 })()
