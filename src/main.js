@@ -27,17 +27,24 @@ app.use(async (ctx) => {
 app.ws.use(
   route.all('/ws', (ctx) => {
     ctx.websocket.on('message', (data) => {
-      if (typeof data !== 'string') {
-        return
-      }
+      // @ts-ignore
       const { message, nickname } = JSON.parse(data)
 
-      ctx.websocket.send(
-        JSON.stringify({
-          message,
-          nickname,
-        })
-      )
+      const { server } = app.ws
+
+      if (!server) {
+        return
+      }
+
+      // localhost:3000/ws 에 연결된 모든 클라이언트들에게 브로드캐스트 forEach
+      server.clients.forEach((client) => {
+        client.send(
+          JSON.stringify({
+            message,
+            nickname,
+          })
+        )
+      })
     })
   })
 )
