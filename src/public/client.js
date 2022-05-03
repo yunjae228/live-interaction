@@ -29,6 +29,7 @@
   const adjectives = ['멋진', '훌륭한', '친절한', '새침한']
   const animals = ['물범', '사자', '사슴', '돌고래', '독수리']
 
+  // array 파라미터가 뭔지 모르기 때문에 error 발생 -> @param 정의
   /**
    * @param {string[]} array
    * @returns {string}
