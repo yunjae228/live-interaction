@@ -54,6 +54,10 @@ socket.addEventListener('message', (event) => {
 
 ## 브로드캐스트 적용
 <img width="1440" alt="스크린샷 2022-05-03 오후 2 11 49" src="https://user-images.githubusercontent.com/74397919/166407193-871e7e66-a1e1-4782-9def-61a39517df3f.png">
-닉네임에 필요한 "형용사"+"명사" 각기 다른 배열로 저장 후
-두 가지 배열을 랜덤으로 합치는 function pickRandom(array) 함수로 클라이언트마다 각기 다른
-닉네임을 생성함
+    닉네임에 필요한 "형용사"+"명사" 각기 다른 배열로 저장 후
+    두 가지 배열을 랜덤으로 합치는 function pickRandom(array) 함수로 클라이언트마다 각기 다른   
+    닉네임을 생성함
+
+## 채팅목록을 MongoDB 활용, collection에 저장
+    Why? => 서버가 죽고 다시살아나도 채팅 정보가 날아가지 않고 남아있고, client가 언제든 접속해도   
+    채팅목록을 볼 수 있게 하기 위함
