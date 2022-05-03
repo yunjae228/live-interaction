@@ -7,6 +7,7 @@ const path = require('path')
 const route = require('koa-route')
 const websockify = require('koa-websocket')
 const app = websockify(new Koa())
+const mongoClient = require('./mongo')
 
 const serve = require('koa-static')
 const mount = require('koa-mount')
@@ -23,12 +24,51 @@ app.use(async (ctx) => {
   await ctx.render('main')
 })
 
+// mongodb 연결은 단 한번만 해도되니 따로 _client변수로 선언해서 사용하도록 하자
+const _client = mongoClient.connect()
+
+// mongodb client 연결 변수를 토대로 collection과 db 생성 (chat db)
+async function getChatsCollection() {
+  const client = await _client
+  return client.db('chat').collection('chats')
+}
+
 // Using routes
 app.ws.use(
-  route.all('/ws', (ctx) => {
-    ctx.websocket.on('message', (data) => {
+  route.all('/ws', async (ctx) => {
+    const chatsCollection = await getChatsCollection()
+    const chatCursor = chatsCollection.find(
+      {},
+      {
+        sort: {
+          createdAt: 1,
+        },
+      }
+    )
+
+    const chats = await chatCursor.toArray()
+    ctx.websocket.send(
+      JSON.stringify({
+        type: 'sync',
+        payload: {
+          chats,
+        },
+      })
+    )
+
+    ctx.websocket.on('message', async (data) => {
+      /**
+       * @type {Chat}
+       */
       // @ts-ignore
-      const { message, nickname } = JSON.parse(data)
+      const chat = JSON.parse(data)
+
+      //
+      await chatsCollection.insertOne({
+        ...chat,
+        createdAt: new Date(),
+      })
+      const { message, nickname } = chat
 
       const { server } = app.ws
 
@@ -40,8 +80,11 @@ app.ws.use(
       server.clients.forEach((client) => {
         client.send(
           JSON.stringify({
-            message,
-            nickname,
+            type: 'chat',
+            payload: {
+              message,
+              nickname,
+            },
           })
         )
       })

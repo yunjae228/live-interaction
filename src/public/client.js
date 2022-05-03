@@ -58,17 +58,27 @@
     inputEl.value = ''
   })
 
-  socket.addEventListener('message', (event) => {
-    chats.push(JSON.parse(event.data))
-
+  const drawChats = () => {
     // 채팅목록 초기화
     chatsEl.innerHTML = ''
-
     // chatsElement 안에 받아온 채팅들을 하나씩 끼워넣기
     chats.forEach(({ nickname, message }) => {
       const div = document.createElement('div')
       div.innerText = `${nickname} : ${message}`
       chatsEl.appendChild(div)
     })
+  }
+
+  socket.addEventListener('message', (event) => {
+    const { type, payload } = JSON.parse(event.data)
+    if (type === 'sync') {
+      const { chats: syncedChats } = payload
+      chats.push(...syncedChats)
+    } else if (type === 'chat') {
+      const chat = payload
+      chats.push(chat)
+    }
+
+    drawChats()
   })
 })()
